@@ -19,7 +19,6 @@ class WorkZora:
         self.route = [self.name_func[func] for func in cng.Route]
         self.web3 = EVM.web3('zora')
         self.address = self.web3.eth.account.from_key(self.private_key).address
-        self.start_work()
 
     def okx_withdraw(self):
         value = EVM.uniform_(cng.OKX_ETH)
@@ -38,10 +37,13 @@ class WorkZora:
         EVM.waiting_coin(self.private_key, 'zora', '', value)
 
     def zora_nft(self):
-        mint_zora(self.private_key)
+        balance, _ = EVM.check_balance(self.private_key, 'zora', '')
+        if balance >= EVM.DecimalFrom(0.5 / EVM.prices_network('zora'), 18):
+            mint_zora(self.private_key)
+        else:
+            log().error(f'Ваш баланс мал {EVM.DecimalTO(balance, 18)} ETH -> {self.address}')
 
     def start_work(self):
-        EVM.delay_start()
         for func in self.route:
             func()
 
@@ -50,11 +52,16 @@ def main():
     private = EVM.open_private()
     if cng.CHECK_GWEI:
         EVM.check_gwei()
-    try:
-        with Pool(cng.THREAD) as pols:
-            pols.map(lambda func: WorkZora(func), private)
-    except BaseException as error:
-        log().error(error)
+
+    def work(private_key):
+        EVM.delay_start()
+        start = WorkZora(private_key)
+        start.start_work()
+    # try:
+    with Pool(cng.THREAD) as pols:
+        pols.map(lambda func: work(func), private)
+    # except BaseException as error:
+    #     log().error(error)
 
 
 if __name__ == '__main__':

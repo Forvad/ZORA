@@ -6,7 +6,7 @@ from multiprocessing.dummy import current_process
 from web3 import Web3
 from Contract.RPC import RPC
 from requests import get
-from config import MAX_GAS_CHARGE, GWEI, RETRY, CHECK_GASS
+from config import MAX_GAS_CHARGE, GWEI, RETRY, CHECK_GASS, proxy
 from Log.Loging import log, inv_log
 from Abi.abi import ABI
 
@@ -33,6 +33,11 @@ class EVM:
     @staticmethod
     def web3(chain: str) -> Web3:
         """Opening RPC in Web3"""
+        if proxy:
+            proxy_ = 'http://' + proxy
+            web3 = Web3(Web3.HTTPProvider(RPC[chain]['rpc'],
+                                          request_kwargs={"proxies": {'https': proxy_, 'http': proxy_}}))
+            return web3
         rpc = RPC[chain]['rpc']
         web3 = Web3(Web3.HTTPProvider(rpc))
         return web3

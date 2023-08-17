@@ -34,9 +34,6 @@ def mint(private_key):
     contract_address = web3.to_checksum_address('0x0000000000664ceffed39244a8312bD895470803')
     contract = web3.eth.contract(address=contract_address, abi=open_abi()['abi_Mint_Fun'])
 
-    base_fee = web3.eth.fee_history(web3.eth.get_block_number(), 'latest')['baseFeePerGas'][-1]
-    priority_max = web3.to_wei(0.6, 'gwei')
-
     # Fetch a link but don't increment the counter yet
 
     referrer = web3.to_checksum_address(Refferel)
