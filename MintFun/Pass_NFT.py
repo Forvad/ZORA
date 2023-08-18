@@ -38,12 +38,17 @@ def mint(private_key):
 
     referrer = web3.to_checksum_address(Refferel)
     signature = get_sign(address, referrer)
+    base_fee = web3.eth.fee_history(web3.eth.get_block_number(), 'latest')['baseFeePerGas'][-1]
+    priority_max = web3.to_wei(0.6, 'gwei')
 
     tx = contract.functions.mint(referrer, signature).build_transaction({
         'from': address,
         'nonce': web3.eth.get_transaction_count(address),
-        'gasPrice': web3.eth.gas_price,
-        'gas': 0
+        # 'gasPrice': web3.eth.gas_price,
+        # 'gas': 0
+        'maxFeePerGas': base_fee + priority_max,
+        'maxPriorityFeePerGas': priority_max,
+        'gas': 0,
     })
     module_str = 'Mint FunPass'
     EVM.sending_tx(web3, tx, 'ethereum', private_key, 0, module_str)

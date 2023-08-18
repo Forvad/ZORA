@@ -18,6 +18,8 @@ class ZoraBridge:
         wallet = web3.eth.account.from_key(self.private_key).address
         module_str = f'Zora Bridge | {wallet} | Ethereum -> Zora'
         l2_value = EVM.DecimalFrom(self.amount, 18)
+        base_fee = web3.eth.fee_history(web3.eth.get_block_number(), 'latest')['baseFeePerGas'][-1]
+        priority_max = web3.to_wei(0.6, 'gwei')
         tx = contract.functions.depositTransaction(
             wallet,
             l2_value,
@@ -28,8 +30,10 @@ class ZoraBridge:
             "value": l2_value,
             'from': wallet,
             'gas': 0,
-            'gasPrice': web3.eth.gas_price,
+            # 'gasPrice': web3.eth.gas_price,
             'nonce': web3.eth.get_transaction_count(wallet),
+            'maxFeePerGas': base_fee + priority_max,
+            'maxPriorityFeePerGas': priority_max
         })
         tx_bool = EVM.sending_tx(web3, tx, 'ethereum', self.private_key, self.retry, module_str, sell_add=l2_value)
         if not tx_bool:

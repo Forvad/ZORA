@@ -43,7 +43,7 @@ class EVM:
         return web3
 
     @staticmethod
-    def DecimalTO(value: (float, int), decimal: int) -> int | float:
+    def DecimalTO(value: (float, int), decimal: int) -> int or float:
         """Subtract decimal"""
         if not isinstance(value, (int, float)) and not isinstance(decimal, int):
             inv_log().info(f'vaule = {value}, decimal = {decimal}')
@@ -88,7 +88,7 @@ class EVM:
             EVM.prices_network(chain)
 
     @staticmethod
-    def add_gas(web3: Web3, contract_txn: dict) -> dict | bool:
+    def add_gas(web3: Web3, contract_txn: dict) -> dict or bool:
         """Adding gas to the transaction"""
         try:
             pluser = [1.05, 1.07]
@@ -112,7 +112,7 @@ class EVM:
             return True
 
     @staticmethod
-    def sign_tx(web3: Web3, contract_txn: dict, private_key: str) -> str | bool:
+    def sign_tx(web3: Web3, contract_txn: dict, private_key: str) -> str or bool:
         """transaction signature"""
         try:
             signed_tx = web3.eth.account.sign_transaction(contract_txn, private_key)
@@ -203,7 +203,7 @@ class EVM:
         w3 = EVM.web3('ethereum')
         gas_price = w3.eth.gas_price
         gwei_gas_price = w3.from_wei(gas_price, 'gwei')
-        while gwei_gas_price > GWEI:
+        while gwei_gas_price >= GWEI:
             log().info(f'GWEI {gwei_gas_price} > {GWEI}')
             gas_price = w3.eth.gas_price
             gwei_gas_price = w3.from_wei(gas_price, 'gwei')
@@ -267,9 +267,6 @@ class EVM:
             wallet = web3.eth.account.from_key(private_key).address
             contract = web3.eth.contract(address=Web3.to_checksum_address(token_address), abi=ABI['abi_ERC20'])
             allowance_amount = contract.functions.allowance(wallet, spender).call()
-            # contract, decimals, symbol = EVMUtils.check_data_token(chain, token_address)
-
-            # module_str = f'approve : {symbol}'
 
             if amount > allowance_amount:
                 contract_txn = contract.functions.approve(
