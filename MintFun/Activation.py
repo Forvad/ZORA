@@ -1,4 +1,4 @@
-from requests import Session, post
+from requests import Session, post, get
 from Log.Loging import log
 from pyuseragents import random as random_useragent
 import time
@@ -47,7 +47,8 @@ def pass_activation(session, address):
     if 'pointsApplied' in verify:
         time.sleep(3)
         info = session.get(f'https://mint.fun/api/mintfun/fundrop/points?address={address}').json()
-        log().success(f'Success Activation {info["points"]} potion')
+        if 'points' in info:
+            log().success(f'Success Activation {info["points"]} potion')
     else:
         log().error(f'error: {verify}')
 
@@ -81,6 +82,14 @@ def add_point(address, hash_tx, contract):
     post('https://mint.fun/api/mintfun/submit-tx', headers=headers, json=json_data).json()
 
 
+def signatures(private_key):
+    address = Account.from_key(private_key).address
+    headers = {'user-agent': random_useragent()}
+    r = get(f'https://mint.fun/api/mintfun/fundrop/season1/mint?address={address}', headers).json()
+    # https://mint.fun/api/mintfun/fundrop/season1/mint?address=0xDbde3A019589F121eBFd68cFCBa6f70becD76CC5
+    return r
+
+
 if __name__ == '__main__':
-    pass
+    print(signatures('4459d59f565f2efaa2d0d348df90304ce805ce82016c04f5975c0727966856bd'))
 

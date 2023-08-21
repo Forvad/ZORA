@@ -29,12 +29,13 @@ class ZoraBridge:
         ).build_transaction({
             "value": l2_value,
             'from': wallet,
-            'gas': 0,
+            # 'gas': 0,
             # 'gasPrice': web3.eth.gas_price,
             'nonce': web3.eth.get_transaction_count(wallet),
-            'maxFeePerGas': base_fee + priority_max,
-            'maxPriorityFeePerGas': priority_max
+            # 'maxFeePerGas': base_fee + priority_max,
+            # 'maxPriorityFeePerGas': priority_max
         })
+        tx = EVM.get_gas_prices('ethereum', tx)
         tx_bool = EVM.sending_tx(web3, tx, 'ethereum', self.private_key, self.retry, module_str, sell_add=l2_value)
         if not tx_bool:
             self.retry += 1
