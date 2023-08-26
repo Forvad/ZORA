@@ -8,29 +8,34 @@ from config import amount
 from MintFun.Activation import add_point
 from requests import get
 from random import shuffle
+from web3.exceptions import ContractLogicError
+from Log.Loging import inv_log
 
 
 def mint_nft(private_key: str, nft_adr: str, numb: list, name: str,  retry=0) -> None:
-    address_contract = Web3.to_checksum_address(nft_adr)
-    web3 = EVM.web3('zora')
-    contract = web3.eth.contract(address=address_contract, abi=open_abi()['abi_NFT_allure'])
-    wallet = web3.eth.account.from_key(private_key).address
-    module_str = f'Mint {name} -> {wallet}'
-    value = check_fee_nft(address_contract)
+    try:
+        address_contract = Web3.to_checksum_address(nft_adr)
+        web3 = EVM.web3('zora')
+        contract = web3.eth.contract(address=address_contract, abi=open_abi()['abi_NFT_allure'])
+        wallet = web3.eth.account.from_key(private_key).address
+        module_str = f'Mint {name} -> {wallet}'
+        value = 1 #check_fee_nft(address_contract)
 
-    tx = contract.functions.mint(value).build_transaction({
-                                                    'from': wallet,
-                                                    'chainId': web3.eth.chain_id,
-                                                    'gasPrice': Web3.to_wei(0.005, 'gwei'), #web3.eth.gas_price,
-                                                    'nonce': web3.eth.get_transaction_count(wallet),
-                                                    'gas': 0
-                                                    })
-    tx_hash = EVM.sending_tx(web3, tx, 'zora', private_key, retry, module_str, numb=numb)
-    if not tx_hash:
-        time.sleep(15)
-        return mint_nft(private_key, nft_adr, numb, retry+1)
-    time.sleep(5)
-    add_point(wallet, tx_hash, nft_adr)
+        tx = contract.functions.mint(value).build_transaction({
+                                                        'from': wallet,
+                                                        'chainId': web3.eth.chain_id,
+                                                        'gasPrice': Web3.to_wei(0.005, 'gwei'), #web3.eth.gas_price,
+                                                        'nonce': web3.eth.get_transaction_count(wallet),
+                                                        'gas': 0
+                                                        })
+        tx_hash = EVM.sending_tx(web3, tx, 'zora', private_key, retry, module_str, numb=numb)
+        if not tx_hash:
+            time.sleep(15)
+            return mint_nft(private_key, nft_adr, numb, retry+1)
+        time.sleep(5)
+        add_point(wallet, tx_hash, nft_adr)
+    except ContractLogicError as error:
+        inv_log().error(f'{error}')
 
 
 def check_fee_nft(address):

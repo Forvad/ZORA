@@ -9,12 +9,13 @@ from Exchange.OKX import okx_withdraw
 import config as cng
 from multiprocessing.dummy import Pool
 from Log.Loging import log
+from NFT_Zora.Collection import AddCollection
 
 
 class WorkZora:
     def __init__(self, private_key):
         self.name_func = {'OKX': self.okx_withdraw, 'Mint_Fun': self.min_fun, 'Zora_Bridge': self.zora_bridge,
-                          'Zora_NFT': self.zora_nft}
+                          'Zora_NFT': self.zora_nft, 'Create_Collection': self.create_collection}
         self.private_key = private_key
         self.route = [self.name_func[func] for func in cng.Route]
         self.web3 = EVM.web3('zora')
@@ -43,6 +44,10 @@ class WorkZora:
         else:
             log().error(f'Ваш баланс мал {EVM.DecimalTO(balance, 18)} ETH -> {self.address}')
 
+    def create_collection(self):
+        add = AddCollection(self.private_key)
+        add.create_collection()
+
     def start_work(self):
         for func in self.route:
             func()
@@ -57,11 +62,9 @@ def main():
         EVM.delay_start()
         start = WorkZora(private_key)
         start.start_work()
-    # try:
+
     with Pool(cng.THREAD) as pols:
         pols.map(lambda func: work(func), private)
-    # except BaseException as error:
-    #     log().error(error)
 
 
 if __name__ == '__main__':
