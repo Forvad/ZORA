@@ -19,7 +19,7 @@ def mint_nft(private_key: str, nft_adr: str, numb: list, name: str,  retry=0) ->
         contract = web3.eth.contract(address=address_contract, abi=open_abi()['abi_NFT_allure'])
         wallet = web3.eth.account.from_key(private_key).address
         module_str = f'Mint {name} -> {wallet}'
-        value = 1 #check_fee_nft(address_contract)
+        value = check_fee_nft(address_contract)
 
         tx = contract.functions.mint(value).build_transaction({
                                                         'from': wallet,
